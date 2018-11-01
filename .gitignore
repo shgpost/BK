@@ -1,0 +1,24 @@
+[Dd]ebug/
+[Rr]elease/
+[Bb]in/
+[Oo]bj/
+[Pp]ackages/
+/OmnisoftM2M/*.suo
+Build/FxCopLog/AnalysisDlls-FxCop.xml
+*.csproj.user
+/OmnisoftM2M/M2M.HttpFrontend/log
+/OmnisoftM2M/M2M.Backend/log
+/OmnisoftM2M/Publish
+*.pubxml.user
+/OmnisoftM2M/InstallShieldInstaller/InstallActions/*.suo
+/OmnisoftM2M/InstallShieldInstaller/OmnisoftM2M/Build
+/OmnisoftM2M/InstallShieldInstaller/OmnisoftM2M/String1033.txt
+/OmnisoftM2M/InstallShieldInstaller/OmnisoftM2M/Script Files/Setup.obs
+/OmnisoftM2M/InstallShieldInstaller/OmnisoftM2M/Script Files/Setup.dbg
+/OmnisoftM2M/InstallShieldInstaller/OmnisoftM2M/Script Files/Setup.inx
+/OmnisoftM2M/InstallShieldInstaller/OmnisoftM2M/Script Files/Setup.isr
+/OmnisoftM2M/InstallShieldInstaller/OmnisoftM2M/Script Files/Setup.map
+/OmnisoftM2M/TestResults
+/OmnisoftM2M/.vs/OmnisoftM2M/v14/.suo
+/OmnisoftM2M/.vs
+/OmnisoftM2M/InstallShieldInstaller/InstallActions/.vs

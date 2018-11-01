@@ -1,0 +1,190 @@
+﻿@{
+  ViewBag.Title = "Båd kompagniet";
+}
+
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <style>
+    .videoContainer {
+      width: 500px;
+      height: 375px;
+      background-color: #666;
+    }
+  </style>
+</head>
+
+<div class="jumbotron">
+  <h1>Båd kompagniet</h1>
+  <p>Kvalitetsikring</p>
+</div>
+
+<div>
+<div class="row">
+  <p>Bruger skal være logget ind</p>
+</div>
+
+<div id="boatNumberContainer" class="row">
+  <div class="col-md-4">
+    <h2>Bådnummer</h2>
+    <p>
+      Skan bådens nummer med dit kamera, eller tast manuelt
+    </p>
+    <input type="text" id="boat" /> 
+    <hr/>
+  </div>
+</div>
+
+<div id ="ropeContainer" class="row">
+  <div  class="col-md-4">
+    <h2>Snor</h2>
+    <p>Brug dit kamera til at tage et billed af snoren</p>
+    <p>Hold snoren som skitseret</p>
+    <img src="~/Content/img/rope.png" />
+    <hr/>
+  </div>
+</div>
+
+<div class="row">
+  <div id="streamContainer">
+    @*https://www.c-sharpcorner.com/UploadFile/4d9083/capturing-image-from-web-cam-in-Asp-Net-mvc139/*@
+    @*https://www.kirupa.com/html5/accessing_your_webcam_in_html5.htm*@
+    <video class ="videoContainer" autoplay="true" id="videoElement"></video>
+  </div>
+  
+  <canvas id="canvas" style="display: none"></canvas>
+  <div id="streamSnapContainer">
+    <img class ="videoContainer" id="preview" src=""/>
+  </div>
+</div>
+  <a href="#" id ="btnOk" class="btn btn-info btn-lg">
+    <span class="glyphicon glyphicon-camera"></span> 
+  </a>
+<label id="feedback"></label>
+</div>
+
+<script>
+  var video = document.querySelector("#videoElement");
+  var width = 320;    // We will scale the photo width to this
+  var height = 200;   // This will be computed based on the input stream
+
+  var scan = function() {
+  };
+  var doSubmit = function() {
+  }
+
+  $('#btnOk').on('click',
+    function(e) {
+      doSubmit();
+    });
+ 
+  function init() {
+    scan = scanText;
+    doSubmit = boatScanned;
+    $("#boatNumberContainer").show();
+    $("#streamContainer").show();
+    $("#streamSnapContainer").hide();
+    $("#ropeContainer").hide();
+  }
+
+  $(document).ready(function () {
+    init();
+    setupCam();
+    window.setInterval(function () {
+      scan();
+    }, 2000);
+  });
+
+  function setupCam() {
+    if (navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function (stream) {
+          video.srcObject = stream;
+        })
+        .catch(function (error) {
+          alert("Der gik noget galt, er din browser opdateret?");
+        });
+    }
+  }
+
+  function boatScanned() {
+    $("#ropeContainer").show();
+    $("#boatNumberContainer").hide();
+    $("#streamSnapContainer").show();
+    $("#streamContainer").hide();
+    scan = findMetaData;
+
+    //save boatId to session
+    var boatid = $("#boat").val();
+    sessionStorage.setItem("BoatNumber", boatid);
+
+    doSubmit = function () {
+      var result = JSON.stringify({
+        boatId: sessionStorage.getItem("BoatNumber"),
+        meta: sessionStorage.getItem("Meta")
+      });
+
+      $.ajax({
+        type: "POST",
+        url: "/Home/SaveData",
+        contentType: 'application/json',
+        data: result,
+        success: function() {
+            init();
+        }}
+      );
+    }
+  }
+
+  function scanText() {
+    takePicture(function(data) {
+      $.ajax({
+        type: "POST",
+        url: "/Home/CaptureText",
+        data: { data: data },
+        success: function(result) {
+          if (result.Text.length > 0) {
+            $("#boat").val(result.Text);
+          }
+        }
+      });
+    })};
+
+  function findMetaData() {
+    takePicture(function(data) {
+    $.ajax({
+      type: "POST",
+      url: "/Home/CaptureMeta",
+      data: { data: data },
+      success: function (result) {
+        sessionStorage.setItem("Meta", JSON.stringify(result));
+
+        $("#feedback").text("Objekt #1 Længde #2 /n Beskrivelse #3".
+          replace("#1", result.Tags).
+          replace("2", result.Length).
+          replace("#3", result.Description)
+        );
+        
+        document.getElementById("preview").src = "data:image/png;base64," + result.ImageStream;
+        }
+      });
+    });
+    };
+    //https://github.com/mdn/samples-server/blob/master/s/webrtc-capturestill/capture.js
+    function takePicture(onData) {
+      height = video.videoHeight / (video.videoWidth / width);
+      var context = canvas.getContext('2d');
+      if (width && height)
+      {
+        canvas.width = width;
+        canvas.height = height;
+        context.drawImage(video, 0, 0, width, height);
+
+        var data = canvas.toDataURL('image/png');
+        onData(data); 
+      }
+    };
+
+
+
+</script>
+
